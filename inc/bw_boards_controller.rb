@@ -7,19 +7,19 @@
                     'updated_on' => "#{Message.table_name}.updated_on"
 
         @topic_count = @board.topics.count
-        @topic_pages = ActionController::Pagination::Paginator.new self, @topic_count, per_page_option, params['page']
+        @topic_pages = Redmine::Pagination::Paginator.new @topic_count, per_page_option, params['page']
       # VVK
         order_sort = ["#{Message.table_name}.sticky_priority DESC", sort_clause].compact.join(', ')
         if Rails::VERSION::MAJOR >= 3
           @topics =  @board.topics.reorder(order_sort).all(:include => [:author, {:last_reply => :author}],
-                                        :limit  =>  @topic_pages.items_per_page,
-                                        :offset =>  @topic_pages.current.offset)
+                                        :limit  =>  @topic_pages.per_page,
+                                        :offset =>  @topic_pages.offset)
 
         else
           @topics =  @board.topics.find :all, :order => order_sort,
                                         :include => [:author, {:last_reply => :author}],
-                                        :limit  =>  @topic_pages.items_per_page,
-                                        :offset =>  @topic_pages.current.offset
+                                        :limit  =>  @topic_pages.per_page,
+                                        :offset =>  @topic_pages.offset
         end
       # VVK
         @message = Message.new(:board => @board)
